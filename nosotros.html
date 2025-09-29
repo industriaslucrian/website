@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestra Historia - Industrias Lucrian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles/custom.css">
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 min-h-screen">
+    
+    <header class="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-sm shadow-md z-30">
+        <div class="bg-gradient-to-r from-purple-500 to-blue-500 text-white text-center py-2 text-sm font-medium">
+            ¡ENVÍO GRATIS en pedidos superiores a $<span id="shipping-threshold">200.000</span>!
+        </div>
+
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
+                LUCRÍAN
+            </h1>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html" class="text-gray-700 hover:text-purple-600 font-medium transition-colors">Inicio</a>
+                
+                <div class="relative group">
+                    <button class="text-gray-700 hover:text-purple-600 font-medium transition-colors focus:outline-none flex items-center">
+                        Productos 
+                        <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="absolute left-0 mt-3 w-48 bg-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-40 p-2">
+                        <a href="index.html#productos" class="block px-4 py-2 text-gray-700 hover:bg-purple-100 rounded-lg">Ropa Dama</a>
+                        <a href="index.html#productos" class="block px-4 py-2 text-gray-700 hover:bg-purple-100 rounded-lg">Ropa Caballero</a>
+                        <a href="index.html#productos" class="block px-4 py-2 text-gray-700 hover:bg-purple-100 rounded-lg">Ropa Niño</a>
+                        <a href="index.html#productos" class="block px-4 py-2 text-gray-700 hover:bg-purple-100 rounded-lg">Ropa Bebé</a>
+                        <a href="index.html#productos" class="block px-4 py-2 text-gray-700 hover:bg-purple-100 rounded-lg">Ropa Escolar</a>
+                    </div>
+                </div>
+
+                <a href="nosotros.html" class="text-gray-700 hover:text-purple-600 font-medium transition-colors">Nuestra Historia</a>
+                <a href="index.html#calidad" class="text-gray-700 hover:text-purple-600 font-medium transition-colors">Calidad</a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleCart()" class="text-gray-700 hover:text-purple-600 relative p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <span id="cart-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
+                </button>
+                <button id="menu-toggle" class="md:hidden text-gray-700 hover:text-purple-600 p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg border-t pb-4">
+            <nav class="px-6 space-y-2 pt-2">
+                <a href="index.html" class="block py-2 text-gray-700 hover:bg-purple-50 rounded-lg">Inicio</a>
+                
+                <div>
+                    <button id="mobile-productos-toggle" class="w-full text-left py-2 flex justify-between items-center text-gray-700 hover:bg-purple-50 rounded-lg">
+                        Productos
+                        <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="mobile-productos-menu" class="hidden pl-4 space-y-1 border-l ml-2">
+                        <a href="index.html#productos" class="block py-2 text-sm text-gray-600 hover:bg-purple-50 rounded-lg">Ropa Dama</a>
+                        <a href="index.html#productos" class="block py-2 text-sm text-gray-600 hover:bg-purple-50 rounded-lg">Ropa Caballero</a>
+                        <a href="index.html#productos" class="block py-2 text-sm text-gray-600 hover:bg-purple-50 rounded-lg">Ropa Niño</a>
+                        <a href="index.html#productos" class="block py-2 text-sm text-gray-600 hover:bg-purple-50 rounded-lg">Ropa Bebé</a>
+                        <a href="index.html#productos" class="block py-2 text-sm text-gray-600 hover:bg-purple-50 rounded-lg">Ropa Escolar</a>
+                    </div>
+                </div>
+
+                <a href="nosotros.html" class="block py-2 text-gray-700 hover:bg-purple-50 rounded-lg">Nuestra Historia</a>
+                <a href="index.html#calidad" class="block py-2 text-gray-700 hover:bg-purple-50 rounded-lg">Calidad</a>
+            </nav>
+        </div>
+    </header>
+    <main class="pt-40 pb-20">
+        <section id="nosotros-historia" class="container mx-auto px-6">
+            <div class="max-w-5xl mx-auto bg-white p-8 md:p-16 rounded-3xl shadow-2xl">
+                
+                <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-6 text-center">
+                    Nuestra Historia: Calidad desde la Fábrica
+                </h1>
+                
+                <p class="text-xl text-gray-700 mb-12 text-center max-w-3xl mx-auto">
+                    Industrias Lucrian nació de la pasión por la costura de alta calidad. Somos una fábrica de ropa 100% colombiana, comprometida con vestir a toda la familia con durabilidad y estilo.
+                </p>
+
+                <div class="space-y-10">
+                    <div class="flex flex-col md:flex-row gap-8 items-center border-b pb-10">
+                        <div class="md:w-1/2">
+                            <h2 class="text-3xl font-bold text-purple-600 mb-4">Los Inicios: Una Fábrica Familiar</h2>
+                            <p class="text-gray-700 leading-relaxed">
+                                Todo comenzó en 2017, en un pequeño taller familiar con la visión de desafiar el mercado con prendas hechas para durar. Creemos que la ropa para el día a día no tiene por qué ser desechable. Nos enfocamos en la selección de las mejores telas y en la precisión de cada corte y costura.
+                            </p>
+                        </div>
+                        <div class="md:w-1/2">
+                            <img src="https://via.placeholder.com/700x400/764ba2/ffffff?text=Taller+Inicial" alt="Taller de Costura Inicial" class="rounded-xl shadow-lg w-full object-cover h-64">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row-reverse gap-8 items-center border-b pb-10">
+                        <div class="md:w-1/2">
+                            <h2 class="text-3xl font-bold text-blue-600 mb-4">Crecimiento y Alcance Nacional</h2>
+                            <p class="text-gray-700 leading-relaxed">
+                                Hoy, somos una fábrica con más de 50 empleados dedicados, manteniendo la esencia de un negocio familiar. Este ecommerce es el puente directo de nuestra fábrica a tu hogar, eliminando intermediarios para ofrecerte precios justos y la garantía de que cada prenda tiene nuestra dedicación.
+                            </p>
+                        </div>
+                        <div class="md:w-1/2">
+                            <img src="https://via.placeholder.com/700x400/667eea/ffffff?text=Equipo+Lucrian" alt="Equipo de la Fábrica" class="rounded-xl shadow-lg w-full object-cover h-64">
+                        </div>
+                    </div>
+                    
+                    <div class="text-center pt-8">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-6">Nuestros Valores</h2>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="p-4 bg-purple-50 rounded-xl shadow-inner">
+                                <h3 class="text-xl font-semibold text-purple-700">Responsabilidad</h3>
+                                <p class="text-sm text-gray-600 mt-1">Con el producto y el cliente.</p>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-xl shadow-inner">
+                                <h3 class="text-xl font-semibold text-blue-700">Excelencia</h3>
+                                <p class="text-sm text-gray-600 mt-1">En cada material, puntada y acabado.</p>
+                            </div>
+                            <div class="p-4 bg-indigo-50 rounded-xl shadow-inner">
+                                <h3 class="text-xl font-semibold text-indigo-700">Comunidad</h3>
+                                <p class="text-sm text-gray-600 mt-1">Apoyo al talento y mano de obra local.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-6 py-10">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">LUCRÍAN</h3>
+                    <p class="text-sm text-gray-400">Moda con Calidad de Fábrica. Hecho en Colombia.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Navegación</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-400 hover:text-white transition-colors">Inicio</a></li>
+                        <li><a href="nosotros.html" class="text-gray-400 hover:text-white transition-colors">Nuestra Historia</a></li>
+                        <li><a href="index.html#calidad" class="text-gray-400 hover:text-white transition-colors">Calidad</a></li>
+                        <li><a href="index.html#contacto" class="text-gray-400 hover:text-white transition-colors">Contacto</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Categorías</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html#productos" class="text-gray-400 hover:text-white transition-colors">Dama</a></li>
+                        <li><a href="index.html#productos" class="text-gray-400 hover:text-white transition-colors">Caballero</a></li>
+                        <li><a href="index.html#productos" class="text-gray-400 hover:text-white transition-colors">Niño y Bebé</a></li>
+                        <li><a href="index.html#productos" class="text-gray-400 hover:text-white transition-colors">Escolar</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Síguenos</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"></svg></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-700 text-center text-sm text-gray-400">
+                &copy; 2025 Industrias Lucrian. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

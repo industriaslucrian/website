@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrias Lucrian ║ Tienda de ropa</title>
+        <link rel="icon" type="image/png" href="img/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            box-sizing: border-box;
+        }
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-glass {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .product-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .promo-scroll {
+            background: linear-gradient(90deg, #3b3b3b, #ff2d2d, #32d6ff, #ecde19, #a913ff);
+            background-size: 300% 300%;
+            animation: gradient-shift 10s ease infinite, scroll-text 40s linear infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes scroll-text {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .promo-content-spaced {
+        /* Clave: Usa flex y gap para el espaciado entre los hijos directos (los <span>) */
+        display: inline-flex;
+        gap: 1rem; /* 💥 Este valor (32px) controla el espacio entre el rayo y el texto. Ajusta a tu gusto. */
+        }
+
+        .promo-item-text {
+        /* Asegúrate de que el texto no se encoja */
+        flex-shrink: 0; 
+        }
+
+        .promo-separator-char {
+        /* Le puedes dar un color diferente o un margen extra si lo necesitas */
+        color: #fcd34d; /* Amarillo para el rayo */
+        flex-shrink: 0;
+        }
+        /* Y la animación (si la estás usando) */
+        @keyframes scroll-promo {
+        from { transform: translateX(0); }
+        to { transform: translateX(-100%); }
+        }
+        .category-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .category-card:hover::before {
+            left: 100%;
+        }
+        
+        .blob {
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            animation: blob-morph 8s ease-in-out infinite;
+        }
+        
+        @keyframes blob-morph {
+            0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
+            50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
+            75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
+        }
+        
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .category-page {
+            display: none;
+        }
+        
+        .category-page.active {
+            display: block;
+        }
+        
+        .cart-slide {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .cart-slide.open {
+            transform: translateX(0);
+        }
+        
+        .logo-container {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Estilo para los modales de productos */
+        .product-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            max-width: 90%;
+            width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: fadeInScale 0.3s ease-out;
+        }
+        .swatch-small {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+        }
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 min-h-screen">
+    
+   <div class="promo-scroll text-white py-3 text-sm font-semibold overflow-hidden whitespace-nowrap">
+    <div class="promo-content-spaced inline-flex">
+        <span class="promo-item-text">🚚 ENVÍO GRATIS por compras superiores a $200.000 </span>
+        <span class="promo-separator-char">⚡</span>
+        <span class="promo-item-text">✈️ ENVÍOS A TODA COLOMBIA</span>
+        <span class="promo-separator-char">⚡</span>
+        <span class="promo-item-text">🏭 FABRICANTES DIRECTOS - Sin intermediarios</span>
+        <span class="promo-separator-char">⚡</span>
+        <span class="promo-item-text">🎖️ 8 AÑOS DE EXPERIENCIA</span>
+        <span class="promo-separator-char">⚡</span>
+        </div>
+</div>
+
+    <header class="nav-glass fixed w-full top-12 z-50 shadow-lg">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="logo-container">
+                        <img src="./img/logo.png" alt="Tu Logo Aquí" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg" style="display: none;">
+                            <span class="text-white font-bold text-xl">LCA</span> </div>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gradient">Industrias Lucrian</h1>
+                        <p class="text-xs text-gray-500">Calidad que trasciende</p>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" onclick="showPage('home')" class="text-gray-700 hover:text-purple-600 font-medium transition-colors">Inicio</a>
+                    <div class="relative group">
+                        <button class="text-gray-700 hover:text-purple-600 font-medium flex items-center space-x-1 transition-colors">
+                            <span>Productos</span>
+                            <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-2">
+                            <div class="p-2">
+                                <a href="#" onclick="showPage('dama')" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors">
+                                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-red-600">👗</span>
+                                    </div>
+                                    <span>Ropa para Dama</span>
+                                </a>
+                                <a href="#" onclick="showPage('caballero')" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-colors">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-blue-600">👔</span>
+                                    </div>
+                                    <span>Ropa para Caballero</span>
+                                </a>
+                                <a href="#" onclick="showPage('nina')" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-colors">
+                                    <div class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-pink-600">🎀</span>
+                                    </div>
+                                    <span>Ropa para Niña</span>
+                                </a>
+                                <a href="#" onclick="showPage('nino')" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-xl transition-colors">
+                                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-green-600">⚽</span>
+                                    </div>
+                                    <span>Ropa para Niño</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" onclick="showPage('home'); scrollToSection('calidad')" class="text-gray-700 hover:text-purple-600 font-medium transition-colors">Calidad</a>
+                    <a href="#" onclick="showPage('nosotros')" class="text-gray-700 hover:text-purple-600 font-medium transition-colors">Nosotros</a>
+                    <a href="#" onclick="showPage('home'); scrollToSection('contacto')" class="text-gray-700 hover:text-purple-600 font-medium transition-colors">Contacto</a>
+                    
+                    <button onclick="toggleCart()" class="relative bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-3 rounded-2xl font-medium hover:shadow-lg transition-all duration-300 flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                        </svg>
+                        <span>Carrito</span>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center hidden">0</span>
+                    </button>
+                </div>
+                
+                <button id="menu-toggle" class="md:hidden p-2 rounded-xl bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="mobile-menu" class="hidden md:hidden mt-6 p-4 bg-white rounded-2xl shadow-lg">
+                <a href="#" onclick="showPage('home')" class="block py-3 text-gray-700 hover:text-purple-600 font-medium">Inicio</a>
+                <div class="py-2">
+                    <button id="mobile-productos-toggle" class="w-full text-left text-gray-700 hover:text-purple-600 font-medium flex items-center justify-between py-2">
+                        <span>Productos</span>
+                        <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="mobile-productos-menu" class="hidden mt-2 ml-4 space-y-2">
+                        <a href="#" onclick="showPage('dama')" class="block py-2 text-gray-600 hover:text-red-500">👗 Ropa para Dama</a>
+                        <a href="#" onclick="showPage('caballero')" class="block py-2 text-gray-600 hover:text-blue-500">👔 Ropa para Caballero</a>
+                        <a href="#" onclick="showPage('nina')" class="block py-2 text-gray-600 hover:text-pink-500">🎀 Ropa para Niña</a>
+                        <a href="#" onclick="showPage('nino')" class="block py-2 text-gray-600 hover:text-green-500">⚽ Ropa para Niño</a>
+                    </div>
+                </div>
+                <a href="#" onclick="showPage('home'); scrollToSection('calidad')" class="block py-3 text-gray-700 hover:text-purple-600 font-medium">Calidad</a>
+                <a href="#" onclick="showPage('nosotros')" class="block py-3 text-gray-700 hover:text-purple-600 font-medium">Nosotros</a>
+                <a href="#" onclick="showPage('home'); scrollToSection('contacto')" class="block py-3 text-gray-700 hover:text-purple-600 font-medium">Contacto</a>
+
+                <button onclick="toggleCart()" class="w-full mt-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-2xl font-medium flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                    </svg>
+                    <span>Carrito</span>
+                    <span id="mobile-cart-count" class="ml-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <div id="cart-sidebar" class="cart-slide fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 overflow-y-auto">
+        <div class="p-6 border-b bg-gradient-to-r from-purple-500 to-blue-500 text-white">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold">🛍️ Mi Carrito</h2>
+                <button onclick="toggleCart()" class="text-white hover:text-gray-200 p-2 rounded-xl hover:bg-white/20 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div id="cart-items" class="p-6 flex-1">
+            <div id="empty-cart" class="text-center py-16">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Tu carrito está vacío</h3>
+                <p class="text-gray-500">¡Agrega algunos productos increíbles!</p>
+            </div>
+            <div id="cart-list" class="space-y-4 hidden"></div>
+        </div>
+        
+        <div id="cart-footer" class="p-6 border-t border-gray-200 hidden">
+    <div class="mb-4">
+        <div class="flex justify-between items-center text-xl font-bold text-gray-800">
+            <span>Total:</span>
+            <span id="cart-total">$0</span>
+        </div>
+        <p id="shipping-notice" class="text-sm text-green-600 mt-1 hidden">¡Envío gratis incluido! 🎉</p>
+        <p id="shipping-remaining" class="text-sm text-gray-500 mt-1 hidden">
+            Te faltan <span id="remaining-amount" class="font-semibold text-purple-600">$0</span> para envío gratis.
+        </p>
+    </div>
+
+    <h3 class="font-semibold text-gray-700 mb-3">Selecciona tu método de pago:</h3>
+    
+    <button onclick="procesarPagoEnLinea()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors mb-3 shadow-lg">
+        Pagar con Tarjeta o PSE (Online)
+    </button>
+
+    <button onclick="checkout()" class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors flex items-center justify-center shadow-lg">
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12.036 1c-6.627 0-12 5.373-12 12s5.373 12 12 12c5.787 0 10.612-4.041 11.66-9.451l.34-1.55c.071-.328-.158-.654-.486-.725l-2.07-.456c-.328-.071-.654.158-.725.486l-.34 1.55c-1.048 5.41-5.873 9.451-11.66 9.451-5.918 0-10.743-4.825-10.743-10.743s4.825-10.743 10.743-10.743c3.085 0 5.914 1.282 7.957 3.325l-.001.001c.264.264.69.264.954 0l1.19-1.19c.264-.264.264-.69 0-.954-2.476-2.476-5.83-3.882-9.314-3.882zM17.476 7.425c.189.189.189.497 0 .686l-7.51 7.51-3.665-3.665c-.189-.189-.497-.189-.686 0l-.686.686c-.189.189-.189.497 0 .686l4.351 4.351c.094.094.217.14.343.14.126 0 .249-.046.343-.14l8.196-8.196c.189-.189.189-.497 0-.686l-.686-.686z"/></svg>
+        Pedir y Pagar por WhatsApp
+    </button>
+</div>
+    </div>
+
+    <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleCart()"></div>
+
+    <div id="home-page" class="category-page active">
+        <section class="hero-gradient pt-40 pb-20 relative overflow-hidden">
+            <div class="absolute inset-0 bg-cover bg-center" 
+     style="background-image: url('img/fondo-hero.png'); opacity: 0.5;">
+    </div>
+            <div class="container mx-auto px-6 text-center relative z-10">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
+                        Moda que <span class="bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">
+                            Inspira
+                        </span>
+                    </h1>
+                    <p class="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
+                        Cada prenda refleja pasión, dedicación y el talento de manos expertas que trabajan con amor para vestir a tu familia con estilo y confianza.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                        <button onclick="scrollToSection('productos')" class="bg-white text-purple-600 px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                            🛍️ Comprar Ahora
+                        </button>
+                        <button onclick="scrollToSection('contacto')" class="border-2 border-white text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white hover:text-purple-600 transition-all duration-300">
+                            💬 Contactar 
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="productos" class="py-20 relative">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl font-bold text-gradient mb-6">Nuestras Colecciones</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                        Explora una selección de prendas únicas, creadas con la calidad de Lucrian y pensadas para cada miembro de tu familia. Diseño, comodidad y estilo que se adaptan a cada momento de tu vida.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div onclick="showPage('dama')" class="category-card product-card bg-gradient-to-br from-red-400 to-pink-500 rounded-3xl p-8 text-white cursor-pointer group">
+                        <div class="text-center">
+                            <div class="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300">👗</div>
+                            <h3 class="text-2xl font-bold mb-4">Ropa para Dama</h3>
+                            <p class="text-white/90 mb-6">Elegancia y sofisticación en cada diseño</p>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Blusas</span>
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Vestidos</span>
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Pantalones</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div onclick="showPage('caballero')" class="category-card product-card bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl p-8 text-white cursor-pointer group">
+                        <div class="text-center">
+                            <div class="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300">👔</div>
+                            <h3 class="text-2xl font-bold mb-4">Ropa para Caballero</h3>
+                            <p class="text-white/90 mb-6">Estilo y distinción masculina</p>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Camisas</span>
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Pantalones</span>
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Chaquetas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div onclick="showPage('nina')" class="category-card product-card bg-gradient-to-br from-pink-400 to-purple-500 rounded-3xl p-8 text-white cursor-pointer group">
+                        <div class="text-center">
+                            <div class="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300">🎀</div>
+                            <h3 class="text-2xl font-bold mb-4">Ropa para Niña</h3>
+                            <p class="text-white/90 mb-6">Dulces diseños para princesas</p>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Vestidos</span>
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Conjuntos</span>
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Accesorios</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div onclick="showPage('nino')" class="category-card product-card bg-gradient-to-br from-green-400 to-teal-500 rounded-3xl p-8 text-white cursor-pointer group">
+                        <div class="text-center">
+                            <div class="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300">⚽</div>
+                            <h3 class="text-2xl font-bold mb-4">Ropa para Niño</h3>
+                            <p class="text-white/90 mb-6">Estilo y resistencia para sus aventuras</p>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Camisetas</span>
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Jeans</span>
+                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">Bermudas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="calidad" class="py-20 bg-white/70 backdrop-blur-lg">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl font-bold text-gradient mb-4">Nuestro Compromiso</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        La calidad es la base de todo lo que hacemos.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-12">
+                    <div class="p-8 text-center rounded-3xl card-glass shadow-xl">
+                        <div class="text-6xl mb-6 text-purple-600">🧵</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-3">Telas Premium</h3>
+                        <p class="text-gray-600">Seleccionamos las mejores fibras para asegurar durabilidad, comodidad y un tacto suave.</p>
+                    </div>
+                    <div class="p-8 text-center rounded-3xl card-glass shadow-xl">
+                        <div class="text-6xl mb-6 text-purple-600">🏅</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-3">Confección Experta</h3>
+                        <p class="text-gray-600">Cada prenda pasa por manos expertas y rigurosos controles de calidad.</p>
+                    </div>
+                    <div class="p-8 text-center rounded-3xl card-glass shadow-xl">
+                        <div class="text-6xl mb-6 text-purple-600">🌎</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-3">Moda Responsable</h3>
+                        <p class="text-gray-600">Comprometidos con procesos sostenibles y éticos en toda nuestra cadena de suministro.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contacto" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl font-bold text-gradient mb-4">Contáctanos</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Estamos listos para atender tus dudas y pedidos.
+                    </p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto bg-white p-10 rounded-3xl shadow-2xl grid md:grid-cols-2 gap-10">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Información de Contacto</h3>
+                        <ul class="space-y-4 text-lg text-gray-600">
+                            <li class="flex items-center space-x-3">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                                <span>+57 301 203 4125 (WhatsApp)</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                <span>contacto@lucrian.com</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <span>Calle 155 29 63, Floridablanca, Colombia</span>
+                            </li>
+                        </ul>
+                        <div class="mt-8">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Horario de Atención</h4>
+                            <p class="text-gray-600">Lunes a viernes: 7:30 AM - 6:00 PM</p>
+                            <p class="text-gray-600">Sábado: 8:00 AM - 1:00 PM</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Envíanos un Mensaje</h3>
+                        <form id="contact-form" class="space-y-4">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                                <input type="text" id="name" name="name" required class="mt-1 block w-full border border-gray-300 rounded-xl shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                <input type="email" id="email" name="email" required class="mt-1 block w-full border border-gray-300 rounded-xl shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500">
+                            </div>
+                            <div>
+                                <label for="message" class="block text-sm font-medium text-gray-700">Mensaje</label>
+                                <textarea id="message" name="message" rows="4" required class="mt-1 block w-full border border-gray-300 rounded-xl shadow-sm p-3 focus:ring-purple-500 focus:border-purple-500"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 px-6 rounded-2xl font-semibold hover:shadow-lg transition-all duration-300">
+                                Enviar Mensaje
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </div> <div id="nosotros-page" class="category-page pt-40 pb-20">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl font-bold text-gradient mb-6">Nuestra Historia y Misión</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Vstiendo a Colombia con calidad y estilo.
+                </p>
+            </div>
+            
+            <div class="max-w-5xl mx-auto bg-white p-12 rounded-3xl shadow-2xl space-y-10">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-3xl font-bold text-gray-800 mb-4">Quiénes Somos</h3>
+                        <p class="text-gray-600 text-lg leading-relaxed">
+                            En Industrias Lucrian creemos que la moda va más allá de vestir: es una forma de transmitir identidad, confianza y estilo. Desde 2017 dimos nuestros primeros pasos en un pequeño taller confeccionando prendas para niños, y gracias a la pasión, el compromiso con la calidad y el trabajo constante, pronto expandimos nuestra propuesta hacia colecciones completas para dama y caballero.
+                            Hoy seguimos creciendo con el mismo propósito que nos inspiró desde el inicio: ofrecer prendas únicas, elaboradas con dedicación y detalle, que combinan tradición textil, innovación y el talento de manos expertas. Cada diseño refleja nuestro compromiso con la calidad y con brindar a las familias colombianas moda accesible, confiable y duradera.
+                        </p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden shadow-xl">
+                     <img src="img/historia.png" 
+                     alt="Imagen de nuestro equipo y nuestra historia" 
+                     class="w-full h-auto object-cover">
+                    </div>
+                </div>
+                
+                <hr class="border-purple-200">
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-3xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+                            <span>🎯</span>
+                            <span>Nuestra Misión</span>
+                        </h3>
+                        <p class="text-gray-600 text-lg">
+                            Ofrecer moda innovadora y de alta calidad a precios justos, promoviendo la comodidad y el estilo para cada miembro de la familia colombiana. Buscamos inspirar confianza y bienestar con cada prenda que creamos.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+                            <span>💎</span>
+                            <span>Nuestra Visión</span>
+                        </h3>
+                        <p class="text-gray-600 text-lg">
+                            Ser la marca líder de ropa familiar en Colombia, reconocida por nuestra excelencia en calidad, nuestro diseño ético y nuestro compromiso con la satisfacción total del cliente.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="page-terminos" class="category-page pt-40 pb-20">
+        </div>
+    <div id="page-privacidad" class="category-page pt-40 pb-20">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <h2 class="text-5xl font-bold text-gradient mb-10 text-center">🔒 Política de Privacidad</h2>
+            <div class="bg-white p-8 rounded-3xl shadow-2xl space-y-6 text-gray-700">
+                <p class="text-lg font-semibold">Tu privacidad es fundamental. Aquí detallamos el manejo de tus datos.</p>
+                <h3 class="text-2xl font-bold mt-6">1. Recolección de Datos</h3>
+                <p>Solo recopilamos la información estrictamente necesaria para tu compra: nombre, dirección y email. No la compartimos con terceros.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-devoluciones" class="category-page pt-40 pb-20">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <h2 class="text-5xl font-bold text-gradient mb-10 text-center">🔄 Política de Devoluciones</h2>
+            <div class="bg-white p-8 rounded-3xl shadow-2xl space-y-6 text-gray-700">
+                <p class="text-lg font-semibold">Aceptamos devoluciones en un plazo de 30 días con el producto sin usar y con etiquetas.</p>
+                <h3 class="text-2xl font-bold mt-6">1. Proceso de Devolución</h3>
+                <p>Envíanos un mensaje a WhatsApp para iniciar el proceso. Los gastos de envío iniciales no son reembolsables.</p>
+            </div>
+        </div>
+    </div>
+    <div id="dama-page" class="category-page pt-40 pb-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-5xl font-bold text-gradient mb-10 text-center">👗 Ropa para Dama</h2>
+            <div id="dama-products" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <p class="text-center md:col-span-full text-gray-500" id="loading-dama">Cargando productos...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="caballero-page" class="category-page pt-40 pb-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-5xl font-bold text-gradient mb-10 text-center">👔 Ropa para Caballero</h2>
+            <div id="caballero-products" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <p class="text-center md:col-span-full text-gray-500" id="loading-caballero">Cargando productos...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="nina-page" class="category-page pt-40 pb-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-5xl font-bold text-gradient mb-10 text-center">🎀 Ropa para Niña</h2>
+            <div id="nina-products" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <p class="text-center md:col-span-full text-gray-500" id="loading-nina">Cargando productos...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="nino-page" class="category-page pt-40 pb-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-5xl font-bold text-gradient mb-10 text-center">⚽ Ropa para Niño</h2>
+            <div id="nino-products" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <p class="text-center md:col-span-full text-gray-500" id="loading-nino">Cargando productos...</p>
+            </div>
+        </div>
+    </div>
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="text-xl font-bold mb-4 text-purple-400">Industrias Lucrian</h4>
+                    <p class="text-sm text-gray-400">Moda con pasión, calidad que dura.</p>
+                    <div class="flex space-x-4 mt-4"> 
+                     <a href="https://www.facebook.com/industriaslucrian" target="_blank" class="text-gray-400 hover:text-white transition-colors" aria-label="Ir a Facebook">
+                      <i class="fab fa-facebook-f w-6 h-6 text-xl flex justify-center items-center"></i>
+                    </a>
+                    <a href="https://www.instagram.com/industriaslucrian/?next=%2F" target="_blank" class="text-gray-400 hover:text-white transition-colors" aria-label="Ir a Instagram">
+                    <i class="fab fa-instagram w-6 h-6 text-xl flex justify-center items-center"></i>
+                    </a>
+                   <a href="https://www.tiktok.com/@industrias.lucria" target="_blank" class="text-gray-400 hover:text-white transition-colors" aria-label="Ir a TikTok">
+                    <i class="fab fa-tiktok w-6 h-6 text-xl flex justify-center items-center"></i>
+                     </a>
+                </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-xl font-bold mb-4 text-purple-400">Navegación</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" onclick="showPage('home')" class="text-gray-400 hover:text-white transition-colors">Inicio</a></li>
+                        <li><a href="#" onclick="showPage('dama')" class="text-gray-400 hover:text-white transition-colors">Ropa para Dama</a></li>
+                        <li><a href="#" onclick="showPage('caballero')" class="text-gray-400 hover:text-white transition-colors">Ropa para Caballero</a></li>
+                        <li><a href="#" onclick="showPage('nina')" class="text-gray-400 hover:text-white transition-colors">Ropa para Niña</a></li>
+                        <li><a href="#" onclick="showPage('nino')" class="text-gray-400 hover:text-white transition-colors">Ropa para Niño</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-xl font-bold mb-4 text-purple-400">Legal y Ayuda</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" onclick="showPage('page-terminos')" class="text-gray-400 hover:text-white transition-colors">Términos y Condiciones</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Política de Privacidad</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Política de Devoluciones</a></li>
+                        <li><a href="#" onclick="showPage('nosotros')" class="text-gray-400 hover:text-white transition-colors">Nosotros</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-xl font-bold mb-4 text-purple-400">Únete a la Familia</h4>
+                    <p class="text-sm text-gray-400 mb-4">Sé el primero en saber de nuevas colecciones y ofertas.</p>
+                    <form>
+                        <input type="email" placeholder="Tu Email" class="w-full p-3 rounded-xl border border-gray-700 bg-gray-700 text-white focus:ring-purple-500 focus:border-purple-500 mb-3">
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-2xl font-semibold transition-colors">Suscribirme</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-12 pt-8 text-center">
+                <p class="text-sm text-gray-400">© 2025 Industrias Lucrian. Todos los derechos reservados.  | Diseñado por Fernando Cristancho</p>
+            </div>
+        </div>
+        
+    </footer>
+
+    <script src="js/data/products.js"></script>
+    <script src="js/app.js"></script>
+
+    <a href="javascript:void(0)" onclick="contactWhatsApp()" 
+        
+        class="fixed bottom-6 right-6 z-40 p-4 bg-green-500 rounded-full 
+               shadow-xl hover:bg-green-600 transition-all duration-300 
+               transform hover:scale-110 focus:outline-none"
+        aria-label="Contactar por WhatsApp">
+        <i class="fa-brands fa-whatsapp" style="font-size: 40px; color: rgb(255, 255, 255);"></i>
+
+    </a>
+</body>
+</html>
