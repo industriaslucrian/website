@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Industrias Lucrian ║ Tienda de ropa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Industrias Lucrian ║ Tienda de ropa</title>
         <link rel="icon" type="image/png" href="img/logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -12,6 +11,7 @@
         
         body {
             box-sizing: border-box;
+            overflow-x: hidden; /* 🎯 MODIFICACIÓN CLAVE: Oculta el desbordamiento horizontal (arregla la "media página") */
         }
         
         * {
@@ -370,8 +370,7 @@
     <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="toggleCart()"></div>
 
     <div id="home-page" class="category-page active">
-        <section class="hero-gradient pt-40 pb-20 relative overflow-hidden">
-            <div class="absolute inset-0 bg-cover bg-center" 
+        <section class="hero-gradient pt-28 md:pt-40 pb-20 relative overflow-hidden"> <div class="absolute inset-0 bg-cover bg-center" 
      style="background-image: url('img/fondo-hero.png'); opacity: 0.5;">
     </div>
             <div class="container mx-auto px-6 text-center relative z-10">
@@ -541,8 +540,9 @@
                 </div>
             </div>
         </section>
-        </div> <div id="nosotros-page" class="category-page pt-40 pb-20">
-        <div class="container mx-auto px-6">
+        </div> 
+        
+    <div id="nosotros-page" class="category-page pt-28 md:pt-40 pb-20"> <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-5xl font-bold text-gradient mb-6">Nuestra Historia y Misión</h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -591,10 +591,9 @@
             </div>
         </div>
     </div>
-    <div id="page-terminos" class="category-page pt-40 pb-20">
+    <div id="page-terminos" class="category-page pt-28 md:pt-40 pb-20">
         </div>
-    <div id="page-privacidad" class="category-page pt-40 pb-20">
-        <div class="container mx-auto px-6 max-w-4xl">
+    <div id="page-privacidad" class="category-page pt-28 md:pt-40 pb-20"> <div class="container mx-auto px-6 max-w-4xl">
             <h2 class="text-5xl font-bold text-gradient mb-10 text-center">🔒 Política de Privacidad</h2>
             <div class="bg-white p-8 rounded-3xl shadow-2xl space-y-6 text-gray-700">
                 <p class="text-lg font-semibold">Tu privacidad es fundamental. Aquí detallamos el manejo de tus datos.</p>
@@ -604,8 +603,7 @@
         </div>
     </div>
 
-    <div id="page-devoluciones" class="category-page pt-40 pb-20">
-        <div class="container mx-auto px-6 max-w-4xl">
+    <div id="page-devoluciones" class="category-page pt-28 md:pt-40 pb-20"> <div class="container mx-auto px-6 max-w-4xl">
             <h2 class="text-5xl font-bold text-gradient mb-10 text-center">🔄 Política de Devoluciones</h2>
             <div class="bg-white p-8 rounded-3xl shadow-2xl space-y-6 text-gray-700">
                 <p class="text-lg font-semibold">Aceptamos devoluciones en un plazo de 30 días con el producto sin usar y con etiquetas.</p>
@@ -614,8 +612,7 @@
             </div>
         </div>
     </div>
-    <div id="dama-page" class="category-page pt-40 pb-20">
-        <div class="container mx-auto px-6">
+    <div id="dama-page" class="category-page pt-28 md:pt-40 pb-20"> <div class="container mx-auto px-6">
             <h2 class="text-5xl font-bold text-gradient mb-10 text-center">👗 Ropa para Dama</h2>
             <div id="dama-products" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 <p class="text-center md:col-span-full text-gray-500" id="loading-dama">Cargando productos...</p>
@@ -623,8 +620,7 @@
         </div>
     </div>
 
-    <div id="caballero-page" class="category-page pt-40 pb-20">
-        <div class="container mx-auto px-6">
+    <div id="caballero-page" class="category-page pt-28 md:pt-40 pb-20"> <div class="container mx-auto px-6">
             <h2 class="text-5xl font-bold text-gradient mb-10 text-center">👔 Ropa para Caballero</h2>
             <div id="caballero-products" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 <p class="text-center md:col-span-full text-gray-500" id="loading-caballero">Cargando productos...</p>
@@ -632,8 +628,7 @@
         </div>
     </div>
 
-    <div id="nina-page" class="category-page pt-40 pb-20">
-        <div class="container mx-auto px-6">
+    <div id="nina-page" class="category-page pt-28 md:pt-40 pb-20"> <div class="container mx-auto px-6">
             <h2 class="text-5xl font-bold text-gradient mb-10 text-center">🎀 Ropa para Niña</h2>
             <div id="nina-products" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 <p class="text-center md:col-span-full text-gray-500" id="loading-nina">Cargando productos...</p>
@@ -641,8 +636,7 @@
         </div>
     </div>
 
-    <div id="nino-page" class="category-page pt-40 pb-20">
-        <div class="container mx-auto px-6">
+    <div id="nino-page" class="category-page pt-28 md:pt-40 pb-20"> <div class="container mx-auto px-6">
             <h2 class="text-5xl font-bold text-gradient mb-10 text-center">⚽ Ropa para Niño</h2>
             <div id="nino-products" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 <p class="text-center md:col-span-full text-gray-500" id="loading-nino">Cargando productos...</p>
