@@ -17,13 +17,14 @@ const PRODUCTS = [
     // --- ROPA PARA DAMA (dama) ---
     {
         id: 'D001',
-        name: 'Vestido Floral de Verano',
-        price: 95000,
+        name: 'Vestido Algodón Premium',
+        price: 50000,
         category: 'dama',
-        image: 'https://picsum.photos/400/500?random=1&blur=2',
-        description: 'Tejido ligero y fresco para los días más cálidos. Ajuste perfecto y cómodo.',
-        colors: ['red', 'white', 'pink'],
-        sizes: ['XS', 'S', 'M', 'L']
+        images: ['https://i.postimg.cc/J7ZVYm8j/D001.png','https://i.postimg.cc/7hMRHHYr/D001-2.png',
+                'https://i.postimg.cc/T33TswT6/D001-3.png','https://i.postimg.cc/Kj1HT6bY/D001-4.png'],
+        description: '👗Elaborado en RIB Algodón PREMIUM de 280 Grs✨',
+        colors: ['Rojo', 'Blanco', 'Lila', 'Rojo Fuego'],
+        sizes: ['S', 'M', 'L', 'XL'],
     },
     {
         id: 'D002',
@@ -123,5 +124,5 @@ const PRODUCTS = [
     },
 ];
 
-// Si usa TypeScript, puede exportar el tipo:
-// export type Product = typeof PRODUCTS[0];
+ // Si desea añadir imágenes locales por producto: agregar un campo "images" con rutas relativas, por ejemplo:
+ // images: ['img/D001-1.jpg','img/D001-2.jpg']

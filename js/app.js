@@ -1,17 +1,16 @@
+
 /* app.js
-   CORRECCIÓN CLAVE: Las funciones (showPage, openProductOptions, etc.) ahora se exponen
-   al objeto global 'window' inmediatamente. Esto soluciona los problemas de los
-   botones 'onclick' y la carga tardía de productos.
+   Versión con mejora en la carga de imágenes de galería para aceptar múltiples formatos
+   y variantes de ruta (por ejemplo: img/D001-1.jpg, D001-1.jpg, imgD001-1.jpg, .png, .webp, etc.)
+   Mantengo el resto de funcionalidades (carrito, galería, cierre en home, etc.).
 */
 
 (() => {
   // --- Configuración ---
   const STORAGE_KEY = 'lucrian_cart_v1';
   const freeShippingThreshold = 200000;
-  // PASO 13: Revisa y cambia tu número de WhatsApp aquí
   const whatsappNumber = "573012034125"; 
 
-  // Mapa de colores utilizado para los selectores (debe coincidir con products.js)
   const colorMap = {
     red: ['#f97316','#fb7185'],
     pink: ['#f472b6','#a78bfa'],
@@ -27,6 +26,10 @@
   // --- Estado ---
   let cart = loadCart();
   let cartTotal = 0;
+
+  // Protección para evitar abrir->cerrar inmediato del carrito en móviles
+  let lastToggleAt = 0;
+  const TOGGLE_IGNORE_MS = 300;
 
   // --- Utilidades ---
   function loadCart() {
@@ -48,7 +51,6 @@
   }
 
   function formatPrice(n) {
-    // Asegura el formato de peso colombiano (miles con punto, sin decimales)
     return `$${Number(n).toLocaleString('es-CO')}`;
   }
 
@@ -73,7 +75,6 @@
     
     const { id, name, price, colors: colorOptions, sizes: sizeOptions } = product;
     
-    // Build modal DOM
     const backdrop = document.createElement('div');
     backdrop.className = 'product-modal-backdrop';
     backdrop.tabIndex = -1;
@@ -91,8 +92,6 @@
     priceDisplay.textContent = formatPrice(price);
     modal.appendChild(priceDisplay);
 
-
-    // Colors
     const colorLabel = document.createElement('label');
     colorLabel.className = 'block text-lg font-semibold mt-4 text-gray-800';
     colorLabel.textContent = 'Selecciona Color:';
@@ -104,9 +103,9 @@
 
     const colorSelect = document.createElement('input'); 
     colorSelect.type = 'hidden';
-    colorSelect.value = colorOptions[0] || '';
+    colorSelect.value = (colorOptions && colorOptions[0]) || '';
 
-    colorOptions.forEach(col => {
+    (colorOptions || []).forEach(col => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'flex items-center gap-2 px-3 py-2 rounded-xl border transition-all duration-200 focus:outline-none hover:border-purple-500';
@@ -128,14 +127,12 @@
 
       btn.addEventListener('click', () => {
         colorSelect.value = col;
-        // update visual selection
         colorContainer.querySelectorAll('button').forEach(b => b.classList.remove('ring-2','ring-purple-500', 'border-purple-500'));
         btn.classList.add('ring-2','ring-purple-500', 'border-purple-500');
       });
       colorContainer.appendChild(btn);
     });
 
-    // Sizes
     const sizeLabel = document.createElement('label');
     sizeLabel.className = 'block text-lg font-semibold mt-6 text-gray-800';
     sizeLabel.textContent = 'Selecciona Talla:';
@@ -143,7 +140,7 @@
 
     const sizeSelect = document.createElement('select');
     sizeSelect.className = 'w-full mt-2 px-4 py-3 border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500';
-    sizeOptions.forEach(s => {
+    (sizeOptions || []).forEach(s => {
       const opt = document.createElement('option');
       opt.value = s;
       opt.textContent = s;
@@ -151,7 +148,6 @@
     });
     modal.appendChild(sizeSelect);
 
-    // Buttons
     const actions = document.createElement('div');
     actions.className = 'mt-8 flex gap-3 justify-end';
     const cancelBtn = document.createElement('button');
@@ -166,8 +162,8 @@
     addBtn.textContent = 'Agregar al carrito';
     
     addBtn.addEventListener('click', () => {
-      const selectedColor = colorSelect.value || (colorOptions[0] || 'blue');
-      const selectedSize = sizeSelect.value || (sizeOptions[0] || 'M');
+      const selectedColor = colorSelect.value || ((colorOptions && colorOptions[0]) || 'blue');
+      const selectedSize = sizeSelect.value || ((sizeOptions && sizeOptions[0]) || 'M');
       addToCart(id, name, price, selectedColor, selectedSize);
       backdrop.remove();
     });
@@ -178,22 +174,18 @@
     backdrop.appendChild(modal);
     document.body.appendChild(backdrop);
     
-    // accessibility: focus first actionable
     setTimeout(()=> { sizeSelect.focus(); }, 50);
   }
 
   // --- Cart operations ---
   function addToCart(id, name, price, color = 'blue', size = '') {
-    // group items by id + size + color
     const uniqueKey = `${id}-${size}-${color}`;
-    
     const existing = cart.find(i => i.uniqueKey === uniqueKey);
-    
     if (existing) {
       existing.quantity += 1;
     } else {
       cart.push({ 
-        uniqueKey: uniqueKey, // Nuevo campo para agrupar
+        uniqueKey: uniqueKey,
         id: id,
         name: String(name), 
         price: Number(price), 
@@ -202,7 +194,6 @@
         size: String(size) 
       });
     }
-    
     saveCart();
     updateCartDisplay();
     createNotif(`${name} (${size}, ${color}) agregado al carrito! 🎉`);
@@ -211,7 +202,6 @@
   function updateQuantity(uniqueKey, change) {
     const item = cart.find(i => i.uniqueKey === uniqueKey);
     if (!item) return;
-
     item.quantity += change;
     if (item.quantity <= 0) {
       removeFromCart(uniqueKey);
@@ -259,7 +249,6 @@
       cartCountDisplay.textContent = totalItems;
       mobileCartCountDisplay.textContent = totalItems;
       
-      // Render items
       cart.forEach(item => {
         const itemElement = document.createElement('div');
         itemElement.className = 'flex items-center space-x-4 p-4 border rounded-2xl bg-white shadow-sm';
@@ -282,7 +271,6 @@
         cartList.appendChild(itemElement);
       });
       
-      // Shipping notice
       if (cartTotal >= freeShippingThreshold) {
         shippingNotice.classList.remove('hidden');
         shippingRemaining.classList.add('hidden');
@@ -320,85 +308,160 @@
       message += "🚚 Envío no incluido. Por favor, confírmame el costo de envío.\n";
     }
 
-    message += "\nPor favor, confírmame el método de pago y los datos de envío (Nombre, Dirección, Ciudad, Teléfono).\n¡Gracias!";
+    message += "\nPor favor, confírmame el método de pago \n¡Gracias!";
 
-    // Codifica el mensaje para la URL
     const encodedMessage = encodeURIComponent(message);
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-    
     window.open(whatsappLink, '_blank');
   }
-  // --- Nueva función para Pago en Línea ---
-function procesarPagoEnLinea() {
+
+  function procesarPagoEnLinea() {
     if (cart.length === 0) {
         createNotif("¡Tu carrito está vacío! Agrega productos antes de pagar en línea.");
         return;
     }
-
-    // PASO 1: Reemplaza este enlace de ejemplo con tu URL real de pasarela de pago (PayU, Epayco, etc.)
     const paymentLink = "https://tu-pasarela.com/checkout?amount=" + cartTotal;
-    
-    // PASO 2: (Opcional) Puedes añadir una lógica de pre-registro aquí si tu pasarela lo requiere.
-
-    // Notificación al usuario
     createNotif(`Redirigiendo a la pasarela de pago... Total: ${formatPrice(cartTotal)}`);
-
-    // Abre el enlace en una nueva pestaña (simulando la pasarela)
     window.open(paymentLink, '_blank');
+  }
+  window.procesarPagoEnLinea = procesarPagoEnLinea;
 
-    // OPCIONAL: Podrías limpiar el carrito aquí si la pasarela confirma el pago,
-    // pero generalmente se limpia después de la confirmación real del webhook.
-    // cart = [];
-    // saveCart();
-    // updateCartDisplay();
-}
-
-// Asegúrese de que esta nueva función se exporte globalmente
-window.procesarPagoEnLinea = procesarPagoEnLinea;
   // --- Contacto Directo WhatsApp ---
   function contactWhatsApp() {
-    const message = encodeURIComponent("¡Hola! Tengo una pregunta sobre la ropa de Industrias Lucrian.");
+    const message = encodeURIComponent("¡Hola! Tengo una pregunta sobre los productos.");
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${message}`;
     window.open(whatsappLink, '_blank');
   }
 
   // --- Renderizado Dinámico de Productos ---
-  function renderProductCard(product) {
-    const card = document.createElement('div');
-    // Usamos la misma clase de diseño que las tarjetas de categoría
-    card.className = 'product-card bg-white rounded-3xl p-6 shadow-xl flex flex-col justify-between';
-    card.innerHTML = `
-      <div class="mb-4">
-        <img src="${product.image}" alt="${product.name}" class="w-full h-64 object-cover rounded-2xl mb-4 hover:shadow-2xl transition-shadow duration-300">
-        <h3 class="text-xl font-bold text-gray-800 mb-2">${product.name}</h3>
-        <p class="text-sm text-gray-500 h-10 overflow-hidden">${product.description}</p>
-      </div>
-      <div>
-        <div class="text-3xl font-extrabold text-purple-600 mb-4">${formatPrice(product.price)}</div>
-        <button onclick="openProductOptions('${product.id}')" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-2xl font-semibold hover:shadow-lg transition-all duration-300">
-            Añadir al Carrito
-        </button>
-      </div>
-    `;
-    return card;
+ function renderProductCard(product) {
+  const card = document.createElement('div');
+  card.className = 'product-card bg-white rounded-3xl p-6 shadow-xl flex flex-col justify-between';
+
+  // Elementos
+  const top = document.createElement('div');
+  top.className = 'mb-4';
+
+  const imgEl = document.createElement('img');
+  imgEl.alt = (product.name || '').replace(/"/g, '&quot;');
+  imgEl.className = 'w-full h-64 object-cover rounded-2xl mb-4 hover:shadow-2xl transition-shadow duration-300';
+  imgEl.style.display = 'block'; // por si se oculta luego
+
+  // Determinar src inicial: preferir product.images[0], si no usar product.image
+  const preferredSrc = (Array.isArray(product.images) && product.images.length) ? product.images[0] : (product.image || '');
+  if (preferredSrc) imgEl.src = preferredSrc;
+
+  // Click para abrir galería
+  imgEl.addEventListener('click', () => {
+    if (typeof openGallery === 'function') openGallery(product.id);
+  });
+
+  // Manejo robusto de error de carga:
+  // 1) si hay product.image y aún no lo probamos, usarlo.
+  // 2) si hay loadGalleryImages disponible, pedirle las rutas existentes y usar la primera válida.
+  // 3) si nada funciona, ocultar la imagen para no mostrar broken icon.
+  imgEl.addEventListener('error', function handleImgError() {
+    // evitar loops
+    imgEl.removeEventListener('error', handleImgError);
+
+    // Si existe product.image y es distinto al src actual, probarlo
+    const fallback = product.image || '';
+    if (fallback && imgEl.src !== fallback) {
+      imgEl.src = fallback;
+      // volver a añadir listener por si falla también
+      imgEl.addEventListener('error', function secondTry() {
+        imgEl.removeEventListener('error', secondTry);
+        // siguiente paso: intentar loadGalleryImages si existe
+        tryLoadGalleryFirstImageOrHide();
+      });
+      return;
+    }
+
+    // Si no hay fallback directo, intentar con loadGalleryImages (si está definida)
+    tryLoadGalleryFirstImageOrHide();
+  });
+
+  function tryLoadGalleryFirstImageOrHide() {
+    if (typeof loadGalleryImages === 'function') {
+      loadGalleryImages(product, 6).then(images => {
+        if (Array.isArray(images) && images.length > 0) {
+          // Si la primera imagen es igual a la que falló, buscamos la siguiente válida
+          if (images[0] && images[0] !== imgEl.src) {
+            imgEl.src = images[0];
+            // si por alguna razón vuelve a fallar, ocultaremos (no añadimos más listeners)
+          } else if (images.length > 1) {
+            imgEl.src = images[1];
+          } else {
+            imgEl.style.display = 'none';
+          }
+        } else {
+          imgEl.style.display = 'none';
+        }
+      }).catch(err => {
+        console.warn('loadGalleryImages error:', err);
+        imgEl.style.display = 'none';
+      });
+    } else {
+      // No hay función para intentar otras rutas: ocultar la imagen
+      imgEl.style.display = 'none';
+    }
   }
+
+  // Si no hay src inicial y hay product.image, setearlo (esto cubre el caso product.images vacío)
+  if (!imgEl.src && product.image) {
+    imgEl.src = product.image;
+  }
+
+  // Título y descripción
+  const title = document.createElement('h3');
+  title.className = 'text-xl font-bold text-gray-800 mb-2';
+  title.textContent = product.name || '';
+
+  const desc = document.createElement('p');
+  desc.className = 'text-sm text-gray-500 h-10 overflow-hidden';
+  desc.textContent = product.description || '';
+
+  top.appendChild(imgEl);
+  top.appendChild(title);
+  top.appendChild(desc);
+
+  // Pie con precio y botón
+  const bottom = document.createElement('div');
+
+  const priceEl = document.createElement('div');
+  priceEl.className = 'text-3xl font-extrabold text-purple-600 mb-4';
+  priceEl.textContent = formatPrice(product.price || 0);
+
+  const btn = document.createElement('button');
+  btn.className = 'w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-2xl font-semibold hover:shadow-lg transition-all duration-300';
+  btn.type = 'button';
+  btn.textContent = 'Añadir al Carrito';
+  btn.addEventListener('click', () => {
+    if (typeof openProductOptions === 'function') openProductOptions(product.id);
+  });
+
+  bottom.appendChild(priceEl);
+  bottom.appendChild(btn);
+
+  // Montaje
+  card.appendChild(top);
+  card.appendChild(bottom);
+
+  return card;
+}
   
   function loadProducts() {
-    // Aseguramos que PRODUCTS esté disponible (de products.js)
     if (typeof PRODUCTS === 'undefined' || !Array.isArray(PRODUCTS)) {
         console.error("El catálogo de productos (PRODUCTS) no está definido o no es un array.");
         return;
     }
 
     const categories = ['dama', 'caballero', 'nina', 'nino'];
-    
     categories.forEach(cat => {
       const container = document.getElementById(`${cat}-products`);
       if (container) {
-        container.innerHTML = ''; // Limpia el mensaje de "cargando"
-        
+        container.innerHTML = '';
         const products = PRODUCTS.filter(p => p.category === cat);
-        
         if (products.length > 0) {
           products.forEach(product => {
             container.appendChild(renderProductCard(product));
@@ -421,11 +484,21 @@ window.procesarPagoEnLinea = procesarPagoEnLinea;
       sidebar.classList.add('open');
       overlay.classList.remove('hidden');
     }
+    lastToggleAt = Date.now();
+  }
+
+  function closeCartIfOpen() {
+    const sidebar = document.getElementById('cart-sidebar');
+    const overlay = document.getElementById('cart-overlay');
+    if (sidebar && sidebar.classList.contains('open')) {
+      sidebar.classList.remove('open');
+      overlay.classList.add('hidden');
+      lastToggleAt = Date.now();
+    }
   }
 
   function showPage(pageId) {
     document.querySelectorAll('.category-page').forEach(page => {
-      // Oculta todas las páginas, incluyendo home-page
       page.classList.remove('active');
     });
 
@@ -434,32 +507,240 @@ window.procesarPagoEnLinea = procesarPagoEnLinea;
     
     if (targetPage) {
       targetPage.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll al inicio de la página
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (targetId === 'home-page') {
+        closeCartIfOpen();
+      }
     } else {
-        // Si la página no se encuentra (e.g., contacto en home), solo muestra home
         document.getElementById('home-page')?.classList.add('active');
     }
   }
 
   function scrollToSection(sectionId) {
-    // Solo aplica el scroll si estamos en la página de inicio
     if (document.getElementById('home-page')?.classList.contains('active')) {
       const element = document.getElementById(sectionId);
       if (!element) return;
-      
-      const headerHeight = 120; // Altura del encabezado fijo (aproximado)
+      const headerHeight = 120;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    }
+  }
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
+  // --- GALERÍA: carga de imágenes más tolerante a nombres ---
+  function loadGalleryImages(product, maxAttempts = 6) {
+    return new Promise((resolve) => {
+      // 1) Si existe product.images (array), úsalo sin forzar prefijos.
+      if (Array.isArray(product.images) && product.images.length) {
+        const candidates = [];
+        product.images.forEach(u => {
+          if (!u) return;
+          // Si es URL absoluta, la dejamos
+          if (/^https?:\/\//i.test(u)) {
+            candidates.push(u);
+          } else {
+            // rutas relativas: añadimos variantes útiles (tal cual, con img/, y sin slash)
+            const clean = u.replace(/^\/*/, ''); // elimina slash inicial
+            candidates.push(clean);
+            if (!clean.startsWith('img/')) candidates.push('img/' + clean);
+            // si el archivo está en raíz con prefijo img (imgD001-1.jpg)
+            if (!clean.startsWith('img')) candidates.push('img' + clean);
+          }
+        });
+        // eliminar duplicados
+        const uniq = Array.from(new Set(candidates));
+        // Intentamos cargar estas rutas y devolvemos las que existan
+        attemptLoadUrls(uniq).then(found => {
+          if (found.length) resolve(found);
+          else if (product.image) resolve([product.image]);
+          else resolve([]);
+        });
+        return;
+      }
+
+      // 2) Si no hay product.images, intentamos varias convenciones:
+      const id = String(product.id || '').trim();
+      const idLower = id.toLowerCase();
+      const exts = ['jpg','png','jpeg','webp'];
+      const candidates = [];
+
+      for (let i = 1; i <= maxAttempts; i++) {
+        exts.forEach(ext => {
+          candidates.push(`img/${id}-${i}.${ext}`);
+          candidates.push(`${id}-${i}.${ext}`);
+          candidates.push(`img${id}-${i}.${ext}`); // imgD001-1.jpg (sin slash)
+          // lowercase id variants
+          candidates.push(`img/${idLower}-${i}.${ext}`);
+          candidates.push(`${idLower}-${i}.${ext}`);
+          candidates.push(`img${idLower}-${i}.${ext}`);
+        });
+      }
+
+      // also try single-file patterns (no -N)
+      exts.forEach(ext => {
+        candidates.push(`img/${id}.${ext}`);
+        candidates.push(`${id}.${ext}`);
+        candidates.push(`img${id}.${ext}`);
+        candidates.push(`img/${idLower}.${ext}`);
+        candidates.push(`${idLower}.${ext}`);
+        candidates.push(`img${idLower}.${ext}`);
+      });
+
+      // eliminar duplicados
+      const uniqCandidates = Array.from(new Set(candidates));
+
+      attemptLoadUrls(uniqCandidates).then(loaded => {
+        if (loaded.length) {
+          resolve(loaded);
+        } else {
+          if (product.image) resolve([product.image]);
+          else resolve([]);
+        }
+      });
+    });
+
+    // Helper: intenta cargar varias URLs (Image) y devuelve las que existan (en el mismo orden)
+    function attemptLoadUrls(urls) {
+      return new Promise((res) => {
+        const found = [];
+        let checked = 0;
+        const total = urls.length;
+        if (total === 0) {
+          res([]);
+          return;
+        }
+        urls.forEach(url => {
+          // Si ya es URL absoluta, la probamos tal cual
+          const img = new Image();
+          img.onload = () => {
+            found.push(url);
+            check();
+          };
+          img.onerror = () => {
+            check();
+          };
+          img.src = url;
+        });
+        function check() {
+          checked++;
+          // Esperamos a comprobar todas, luego devolvemos found en orden de aparición filtrado por existencia
+          if (checked === total) {
+            res(found);
+          }
+        }
       });
     }
   }
 
-  // --- EXPOSICIÓN GLOBAL DE FUNCIONES (El FIX) ---
-  // Hacemos las funciones accesibles desde los atributos onclick del HTML inmediatamente.
+  // --- Abrir galería modal (lightbox) ---
+  function openGallery(productId) {
+    const product = PRODUCTS.find(p => p.id === productId);
+    if (!product) return;
+    if (document.querySelector('.gallery-backdrop')) return;
+
+    loadGalleryImages(product, 6).then(images => {
+      if (!images || images.length === 0) {
+        createNotif('No se encontraron imágenes para este producto.');
+        return;
+      }
+
+      let currentIndex = 0;
+      const backdrop = document.createElement('div');
+      backdrop.className = 'gallery-backdrop';
+      backdrop.tabIndex = -1;
+
+      const modal = document.createElement('div');
+      modal.className = 'gallery-modal';
+
+      const mainWrap = document.createElement('div');
+      mainWrap.className = 'gallery-main';
+
+      const imgEl = document.createElement('img');
+      imgEl.src = images[currentIndex];
+      imgEl.alt = product.name;
+      imgEl.className = 'gallery-main-img';
+      mainWrap.appendChild(imgEl);
+
+      const controls = document.createElement('div');
+      controls.className = 'gallery-controls';
+      controls.innerHTML = `
+        <div style="display:flex; align-items:center;">
+          <button type="button" class="gallery-prev" aria-label="Anterior">&larr;</button>
+        </div>
+        <div style="display:flex; align-items:center;">
+          <button type="button" class="gallery-next" aria-label="Siguiente">&rarr;</button>
+        </div>
+      `;
+      mainWrap.appendChild(controls);
+
+      const thumbs = document.createElement('div');
+      thumbs.className = 'gallery-thumbs';
+      images.forEach((src, idx) => {
+        const t = document.createElement('div');
+        t.className = 'gallery-thumb' + (idx === 0 ? ' active' : '');
+        const im = document.createElement('img');
+        im.src = src;
+        im.alt = product.name + ' ' + (idx + 1);
+        t.appendChild(im);
+        t.addEventListener('click', () => {
+          currentIndex = idx;
+          updateMain();
+        });
+        thumbs.appendChild(t);
+      });
+
+      modal.appendChild(mainWrap);
+      modal.appendChild(thumbs);
+      backdrop.appendChild(modal);
+      document.body.appendChild(backdrop);
+
+      function updateMain() {
+        imgEl.classList.remove('zoomed');
+        imgEl.src = images[currentIndex];
+        thumbs.querySelectorAll('.gallery-thumb').forEach((th, i) => {
+          th.classList.toggle('active', i === currentIndex);
+        });
+      }
+
+      function next() {
+        currentIndex = (currentIndex + 1) % images.length;
+        updateMain();
+      }
+      function prev() {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        updateMain();
+      }
+
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) {
+          backdrop.remove();
+        }
+      });
+      controls.querySelector('.gallery-next')?.addEventListener('click', next);
+      controls.querySelector('.gallery-prev')?.addEventListener('click', prev);
+
+      imgEl.addEventListener('click', () => {
+        imgEl.classList.toggle('zoomed');
+      });
+
+      function keyHandler(e) {
+        if (e.key === 'Escape') backdrop.remove();
+        if (e.key === 'ArrowRight') next();
+        if (e.key === 'ArrowLeft') prev();
+      }
+      document.addEventListener('keydown', keyHandler);
+
+      const observer = new MutationObserver(() => {
+        if (!document.body.contains(backdrop)) {
+          document.removeEventListener('keydown', keyHandler);
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true });
+    });
+  }
+
+  // --- EXPOSICIÓN GLOBAL ---
   window.openProductOptions = openProductOptions;
   window.addToCart = addToCart;
   window.toggleCart = toggleCart;
@@ -469,15 +750,28 @@ window.procesarPagoEnLinea = procesarPagoEnLinea;
   window.scrollToSection = scrollToSection;
   window.updateQuantity = updateQuantity;
   window.removeFromCart = removeFromCart;
-  
+  window.openGallery = openGallery;
+  window.procesarPagoEnLinea = procesarPagoEnLinea;
+
   // --- INICIALIZACIÓN INMEDIATA ---
-  // Ya que los scripts se cargan al final del <body>, el DOM está listo.
-  loadProducts(); // Carga de productos resuelta.
+  try {
+    const initFlag = localStorage.getItem(STORAGE_KEY + '_initialized');
+    if (!initFlag) {
+      if (Array.isArray(cart) && cart.length > 0) {
+        cart = [];
+        saveCart();
+      }
+      localStorage.setItem(STORAGE_KEY + '_initialized', '1');
+    }
+  } catch (e) {
+    console.warn('Error gestionando flag de inicialización:', e);
+  }
+
+  loadProducts();
   updateCartDisplay();
 
-  // --- EVENTOS DEL DOM (Aseguramos que el DOM esté listo) ---
+  // --- EVENTOS DEL DOM ---
   document.addEventListener('DOMContentLoaded', () => {
-    // Mobile toggles
     document.getElementById('menu-toggle')?.addEventListener('click', () => {
       document.getElementById('mobile-menu')?.classList.toggle('hidden');
     });
@@ -488,15 +782,31 @@ window.procesarPagoEnLinea = procesarPagoEnLinea;
       arrow?.classList.toggle('rotate-180');
     });
 
-    // Contact form
     document.getElementById('contact-form')?.addEventListener('submit', function(e){
       e.preventDefault();
       createNotif('¡Mensaje enviado! Nos contactaremos contigo pronto 📧');
       this.reset();
     });
 
-    // overlay
     document.getElementById('cart-overlay')?.addEventListener('click', toggleCart);
+
+    // Cierre del carrito al tocar la página principal (pointerdown cubre touch)
+    document.addEventListener('pointerdown', (e) => {
+      try {
+        const home = document.getElementById('home-page');
+        const sidebar = document.getElementById('cart-sidebar');
+        if (!home || !home.classList.contains('active')) return;
+        if (!sidebar || !sidebar.classList.contains('open')) return;
+        if (Date.now() - lastToggleAt < TOGGLE_IGNORE_MS) return;
+        const target = e.target;
+        if (target.closest && target.closest('#cart-sidebar')) return;
+        if (target.closest && (target.closest('button')?.getAttribute('onclick')?.includes('toggleCart') || target.closest('#menu-toggle') )) return;
+        if (target.closest && (target.closest('.product-modal-backdrop') || target.closest('.gallery-backdrop'))) return;
+        closeCartIfOpen();
+      } catch (err) {
+        console.warn('Error en handler de cierre de carrito:', err);
+      }
+    });
   });
 
 })();
